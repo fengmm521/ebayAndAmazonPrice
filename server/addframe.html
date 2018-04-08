@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
+        <link rel='icon' href='/home/wu/lanrenimg/5.gif' />
+        <title>比价系统</title>
+        <style type='text/css'>
+        #login {
+                text-align:center;
+                padding:5px;
+        }
+        .must {color:red;}
+        .word {text-align:right;margin-right:30px;}
+        #regist {
+                text-align:center;
+                padding:5px;
+        }
+        #utip,#ptip,#rtip,#mtip {color:red;font-size:10px;}
+        </style>
+        <script>
+        function verun()
+        {
+                var uname=document.getElementById('ebayitem').value;
+                if(uname==''||uname==null)
+                {
+                        document.getElementById('utip').innerHTML='填写eBay商品';
+                        document.getElementById('ebayitem').focus();
+                        return false;
+                }
+                else 
+                {
+                        document.getElementById('utip').innerHTML='';
+                        return true;
+                }
+        }
+        
+        function verpwd()
+        {
+                var pwd=document.getElementById('amazonitem').value;
+                if(pwd==''||pwd==null)
+                {
+                        document.getElementById('ptip').innerHTML='填写Amazon商品';
+                        document.getElementById('amazonitem').focus();
+                        return false;
+                }
+                else
+                {
+                        document.getElementById('ptip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function verrepwd()
+        {
+                var repwd=document.getElementById('repwd').value;
+                var pwd=document.getElementById('pwd').value;
+                if(repwd!==pwd)
+                {
+                        document.getElementById('rtip').innerHTML='密码不一致';
+                        document.getElementById('repwd').focus();
+                        return false;
+                }
+                else 
+                {
+                        document.getElementById('rtip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function vermail()
+        {
+                var mail=document.getElementById('mail').value;
+                if(mail==''||mail==null||mail.indexOf('@')==0||mail.indexOf('.')-mail.indexOf('@')<=1)  //邮箱验证不完善
+                {
+                        document.getElementById('mtip').innerHTML='请填写有效的邮箱';
+                        document.getElementById('mail').focus();
+                        return false;
+                }
+                else
+                {
+                        document.getElementById('mtip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function check()
+        {
+                if(verun() == true)
+                        return true;
+                else 
+                {
+                        alert('新增商品失败，请填写增加的商品地址或ID！')
+                        return false;
+                }
+        }
+        </script>
+</head>
+<body>
+        <div id='login'>
+                <form action='./additem' onsubmit="return check();" method='post'>
+                <table align="center">                
+                        <tr>
+                                <td><span class='must'>*</span>eBay商品：</span></td>
+                                <td><input type='text' style='width:500px;' name='ebayitem' id='ebayitem' onblur='verun()' /></td>
+                                <td style='width:80px;'><span id='utip'></span></td>
+                        </tr>
+                        <tr>
+                                <td><span class='must'>*</span>Amazon商品：</span></td>
+                                <td><input type='text' style='width:500px;' name='amazonitem' id='amazonitem' onblur='verpwd()' /></td>
+                                <td style='width:80px;'><span id='ptip'></span></td>
+                                <td colspan='3' style='text-align:center;'><input type='submit' value='增加商品' /></td>
+                        </tr>
+                        <!-- tr>
+                                <td colspan='3' style='text-align:center;'><input type='submit' value='增加商品' /></td>
+                        </tr> -->
+                </table>
+                </form>
+                
+        </div>
+</body>
+</html>

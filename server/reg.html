@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
+        <link rel='icon' href='/home/wu/lanrenimg/5.gif' />
+        <title>注册</title>
+        <style type='text/css'>
+        #login {width:500px;margin:0 auto;}
+        .must {color:red;}
+        .word {text-align:right;margin-right:30px;}
+        #utip,#ptip,#rtip,#mtip {color:red;font-size:10px;}
+        #header {
+            background-color:black;
+            color:white;
+            text-align:center;
+            padding:5px;
+        }
+        </style>
+        <script>
+        function verun()
+        {
+                var uname=document.getElementById('usename').value;
+                if(uname==''||uname==null)
+                {
+                        document.getElementById('utip').innerHTML='请填写用户名';
+                        document.getElementById('usename').focus();
+                        return false;
+                }
+                else 
+                {
+                        document.getElementById('utip').innerHTML='';
+                        return true;
+                }
+        }
+        
+        function verpwd()
+        {
+                var pwd=document.getElementById('pwd').value;
+                if(pwd==''||pwd==null)
+                {
+                        document.getElementById('ptip').innerHTML='请填写密码';
+                        document.getElementById('pwd').focus();
+                        return false;
+                }
+                else
+                {
+                        document.getElementById('ptip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function verrepwd()
+        {
+                var repwd=document.getElementById('repwd').value;
+                var pwd=document.getElementById('pwd').value;
+                if(repwd!==pwd)
+                {
+                        document.getElementById('rtip').innerHTML='密码不一致';
+                        document.getElementById('repwd').focus();
+                        return false;
+                }
+                else 
+                {
+                        document.getElementById('rtip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function vermail()
+        {
+                var mail=document.getElementById('mail').value;
+                if(mail==''||mail==null||mail.indexOf('@')==0||mail.indexOf('.')-mail.indexOf('@')<=1)  //邮箱验证不完善
+                {
+                        document.getElementById('mtip').innerHTML='请填写有效的邮箱';
+                        document.getElementById('mail').focus();
+                        return false;
+                }
+                else
+                {
+                        document.getElementById('mtip').innerHTML='';
+                        return true;
+                }
+        }
+
+        function check()
+        {
+                if(verun() && verpwd() && verrepwd() && vermail()==true)
+                        return true;
+                else 
+                {
+                        alert('注册失败，请按要求填写信息！')
+                        return false;
+                }
+        }
+        </script>
+</head>
+<body>
+        <div id="header">
+        <h1>比价系统</h1>
+        </div>
+        <div id='login'>
+                <form action='./regist' onsubmit="return check();" method='post'>
+                <table align="center">                
+                        <tr>
+                                <td><span class='must'>*</span>用户名：</span></td>
+                                <td><input type='text' name='usename' id='usename' onblur='verun()' /></td>
+                                <td style='width:80px;'><span id='utip'></span></td>
+                        </tr>
+                        <tr>
+                                <td><span class='must'>*</span>密码：</span></td>
+                                <td><input type='password' name='pwd' id='pwd' onblur='verpwd()' /></td>
+                                <td style='width:80px;'><span id='ptip'></span></td>
+                        </tr>
+                        <tr>
+                                <td><span class='must'>*</span>重复密码：</span></td>
+                                <td><input type='password' name='repwd' id='repwd' onblur='verrepwd()' /></td>
+                                <td style='width:80px;'><span id='rtip'></span></td>
+                        </tr>
+                        <tr>
+                                <td><span class='must'>*</span>邮箱：</span></td>
+                                <td><input type='text' name='mail' id='mail' onblur='vermail()' /></td>
+                                <td style='width:80px;'><span id='mtip'></span></td>
+                        </tr>
+                        <tr>
+                                <td colspan='3' style='text-align:center;'><input type='submit' value='注册' /></td>
+                        </tr>
+                </table>
+                </form>
+        </div>
+        
+</body>
+</html>

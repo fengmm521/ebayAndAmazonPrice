@@ -1,0 +1,8 @@
+{
+    "ip":"127.0.0.1",
+    "port":8901,
+    "user":{
+        "username1":"password1",
+        "username2":"password2"
+    }
+}
