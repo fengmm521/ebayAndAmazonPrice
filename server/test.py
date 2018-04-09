@@ -28,10 +28,14 @@ def main():
 def test():
     getStoreRQImageFromServer()
 
+def test2():
+    aaa = time.strftime('%Y-%m-%d\n %H:%M:%S',time.localtime(time.time()))
+    print(aaa)
+
 #测试
 if __name__ == '__main__':
     # main()
-    test()
+    test2()
 
 
 
