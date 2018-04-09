@@ -20,7 +20,12 @@ import json
 import base64
 import hashlib
 
+import datetime
+
+
 import zlib
+
+# import Cookie
 
 import BS4HTMLTool
 
@@ -46,48 +51,94 @@ print 'selfIP:',selfip
 print 'setLastIP:',setLastIP
 
 
-f = open('./config.txt','r')
-jstr = f.read()
-f.close()
+configdic = {}
 
-configdic = json.loads(jstr)
+users = {}
 
-users = configdic['user']
+usercookies = []
+
+bs4Requesttool = BS4HTMLTool.BS4HTMLTool()
+
+def updateUser():
+    global configdic
+    global users
+    global usercookies
+    f = open('./config.txt','r')
+    jstr = f.read()
+    f.close()
+    configdic = json.loads(jstr)
+    users = configdic['user']
+    usercookies = []
+    for k in users:
+        tmpcookie = hashlib.md5(k + users[k]).hexdigest()
+        usercookies.append(tmpcookie)
+
+updateUser()
+
+#获取cookie过期时间
+def getNewCookieExpTime():
+    expiration = datetime.datetime.now() + datetime.timedelta(days=30)  
+    return expiration
 
 class myHandler(BaseHTTPRequestHandler):
     
-    def __init__(self):  #默认两小时更新一次数据
-        super(myHandler, self).__init__()
-        self.bs4tool = BS4HTMLTool.BS4HTMLTool()
+    global bs4Requesttool
     #刷新数据
-    def requestMarketData(self):
-        pass
+    def addItems(self,itemsobj):
+        print(itemsobj)
+        self.sendTxtMsg('additems')
 
     def login(self,logindat):
-        self.sendMsg('login')
-
+        print(logindat)
+        # self.sendMsg('login')
+        # {'pwd': 'aaa', 'usename': 'aaa'}
+        if logindat['usename'] in users and logindat['pwd'] == users[logindat['usename']]:
+            fpth = curdir + os.sep + 'html' + os.sep + 'list.html'
+            sessionstr = hashlib.md5(logindat['usename'] + logindat['pwd']).hexdigest()
+            cookiestr = "sessionID=%s"%(sessionstr)
+            self.sendHtml(fpth,cookiestr)
+        else:
+            outobj = {"erro":1001,"msg":"用户名不存在或密码错误"}
+            jstr = json.dumps(outobj,ensure_ascii=False)
+            fpth = curdir + os.sep + 'html' + os.sep + 'loginerro.html'
+            self.sendHtml(fpth)
+    def checkCookie(self,cookiestr):
+        if cookiestr:
+            tmpss = cookiestr.split('=')[1]
+            print(tmpss)
+            print(usercookies)
+            if tmpss in usercookies:
+                return True
+        return False
     def do_GET(self):  
     	print('clientIP-->',self.client_address[0])
         print('clienturl-->',self.path)
-
+        cookiestr = self.headers.getheader('Cookie');
+        print('clientcookie---->',cookiestr)
         if self.path=="/":  
-            self.path="/index.html"  
+            if self.checkCookie(cookiestr):
+                self.path="/list.html"
+            else:
+                self.path="/index.html"  
         try:  
             #根据请求的文件扩展名，设置正确的mime类型  
             if self.path.endswith(".html"):  
-                mimetype='text/html'  
-                f = open(curdir + os.sep + self.path, 'rb')  
-                self.send_response(200)  
-                self.send_header('Content-type',mimetype)  
-                self.end_headers()  
-
-                self.wfile.write(f.read())  
-                f.close()  
+                if self.checkCookie(cookiestr):
+                    fpth = curdir + os.sep + 'html' +self.path
+                    self.sendHtml(fpth)
+                else:
+                    fpth = curdir + os.sep + 'html' + os.sep + 'index.html'
+                    self.sendHtml(fpth)
                 return
-
-            elif self.path[1:6] == 'login':#客户端发送RSA公钥上来
+            elif self.path[1:4] == 'img':
+                fpth = curdir + self.path
+                self.sendImage(fpth)
+            elif self.path[1:6] == 'login':#客户端登录
                 print('login--->',self.path)
                 return 'login'
+            elif self.path[1:8] == 'additem': #增加新商品
+                print('additem---->',self.path)
+                return 'additem'
             else:
                 time.sleep(3)
                 self.sendEmptyMsg()
@@ -95,7 +146,34 @@ class myHandler(BaseHTTPRequestHandler):
   
         except IOError:  
             self.send_error(404,'File Not Found: %s' % self.path)  
-  
+    def sendImage(self,imgpth):
+        f = open(imgpth, 'rb') 
+        mimetype='image/*'  
+        self.send_response(200)  
+        self.send_header('Content-type',mimetype)  
+        self.end_headers()
+        self.wfile.write(f.read())  
+        f.close()  
+    def sendHtml(self,fpth,pcookie = None):
+        f = open(fpth, 'rb') 
+        mimetype='text/html'  
+        self.send_response(200)  
+        if pcookie:
+            print(pcookie)
+            self.send_header("Set-Cookie",pcookie)
+        self.send_header('Content-type',mimetype)  
+        self.end_headers()
+        self.wfile.write(f.read())  
+        f.close()  
+
+    def decodePostData(self,strdata):
+        tmps = strdata.split('&')
+        out = {}
+        for d in tmps:
+            objtmp = d.split('=')
+            out[objtmp[0]] = objtmp[1]
+        return out
+
     def do_POST(self):
 
         reqtype = self.do_GET()
@@ -104,11 +182,16 @@ class myHandler(BaseHTTPRequestHandler):
             length = self.headers.getheader('content-length');
             nbytes = int(length)
             data = self.rfile.read(nbytes)
-            msgobj = json.loads(data)
-            # print(msgobj)
-            if reqtype == 'login':  #硬件登陆
-                # print('硬件登陆:\n硬件码:%s'%(msgobj['HardID']))
+            msgobj = self.decodePostData(data)
+            # msgobj = json.loads(data)
+            # print(type(data))
+            # print(data)
+            if reqtype == 'login':  
                 self.login(msgobj)
+            elif reqtype == 'additem':
+                self.addItems(msgobj)
+            elif self.path == "/index.html":
+                return
             else:
                 self.sendEmptyMsg()
 
@@ -116,12 +199,14 @@ class myHandler(BaseHTTPRequestHandler):
             # self.send_error(404,'File Not Found: %s' % self.path)  
     def sendEmptyMsg(self):
         self.send_response(200)
-        self.send_header("Content-type", 'application/xml; encoding=utf-8')
+        self.send_header("Content-type", 'text/json; encoding=utf-8')
         self.send_header("Content-Length", str(''))
         self.end_headers()
         self.wfile.write('')
 
-    def sendMsg(self,msg,isCompress = False):
+
+
+    def sendTxtMsg(self,msg,isCompress = False):
         outstr = ''
         if isCompress:
             demsg = self._compress(msg)
@@ -129,7 +214,7 @@ class myHandler(BaseHTTPRequestHandler):
         else:
             outstr = msg
         self.send_response(200)
-        self.send_header("Content-type", 'application/text; encoding=utf-8')
+        self.send_header("Content-type", 'text/json;charset=utf-8')
         self.send_header("Content-Length", str(len(outstr)))
         self.end_headers()
         self.wfile.write(outstr)
