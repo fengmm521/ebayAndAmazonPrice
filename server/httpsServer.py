@@ -80,13 +80,56 @@ def getNewCookieExpTime():
     expiration = datetime.datetime.now() + datetime.timedelta(days=30)  
     return expiration
 
+
+def addTowURL(ebayurl,amazonurl):
+    # {'amazonitem': 'amazon', 'ebayitem': 'ebayurl'}
+    global bs4Requesttool
+    print(ebayurl)
+    print(amazonurl)
+    isOK = bs4Requesttool.addNewDobuleURL(ebayurl, amazonurl)
+    return isOK
+
+def createTableTR(dat):
+    
+    ebayurl = dat['ebay']['url']
+    eimg = dat['ebay']['imgname']
+    ename = dat['ebay']['name']
+    eprice = dat['ebay']['price']
+    
+    amazonurl = dat['amazon']['url']
+    aimg = dat['amazon']['imgname']
+    aname = dat['amazon']['name']
+    aprice = dat['amazon']['price']
+
+    createtime = dat['time']
+    uptime = dat['ebay']['time']
+    subprice = '$%.2f'%(aprice-eprice)
+
+
+#从数据生成一个html网页
+def createListHtml():
+    global bs4Requesttool
+    datdic = bs4Requesttool.getAllDic()
+    #duboleobj['key'] = objname
+    #duboleobj['ebay'] = {'imgurl':imgurl,'imgname':imgSaveName,'name':title,'price':price,'time':int(time.time()),'market':'ebay','url':purl}
+    #duboleobj['amazon'] = {'imgurl':imgurl,'imgname':imgSaveName,'name':title,'price':price,'time':int(time.time()),'market':'amazon','url':purl}
+    #duboleobj['time'] = time
+    trs = []
+    for k in datdic.keys():
+        trs.append(createTableTR(datdic[k]))
+
+
 class myHandler(BaseHTTPRequestHandler):
     
     global bs4Requesttool
     #刷新数据
     def addItems(self,itemsobj):
         print(itemsobj)
-        self.sendTxtMsg('additems')
+        print(type(itemsobj))
+        if checkURL(itemsobj['ebayitem'], itemsobj['amazonitem']):
+            pass
+        else:
+            self.sendTxtMsg('添加商品失败，请查看输入地址是否正确.')
 
     def login(self,logindat):
         print(logindat)
@@ -105,8 +148,6 @@ class myHandler(BaseHTTPRequestHandler):
     def checkCookie(self,cookiestr):
         if cookiestr:
             tmpss = cookiestr.split('=')[1]
-            print(tmpss)
-            print(usercookies)
             if tmpss in usercookies:
                 return True
         return False
@@ -143,7 +184,6 @@ class myHandler(BaseHTTPRequestHandler):
                 time.sleep(3)
                 self.sendEmptyMsg()
             return  
-  
         except IOError:  
             self.send_error(404,'File Not Found: %s' % self.path)  
     def sendImage(self,imgpth):
@@ -183,9 +223,6 @@ class myHandler(BaseHTTPRequestHandler):
             nbytes = int(length)
             data = self.rfile.read(nbytes)
             msgobj = self.decodePostData(data)
-            # msgobj = json.loads(data)
-            # print(type(data))
-            # print(data)
             if reqtype == 'login':  
                 self.login(msgobj)
             elif reqtype == 'additem':

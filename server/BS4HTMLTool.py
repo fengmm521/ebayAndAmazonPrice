@@ -197,7 +197,7 @@ class BS4HTMLTool(object):
         ebay,amazon = self.getRelUrl(pebay, pamazon)
 
         if ebay == '' or amazon == '':
-            return
+            return None
 
         if ebay[:4] == 'http':
             ebayurl = ebay
@@ -238,8 +238,17 @@ class BS4HTMLTool(object):
 
     def addNewDobuleURL(self,eurl,aurl):
         dictmp = self.getTowObjData(eurl, aurl,isFirst = True)
-        value = json.dumps(dictmp)
-        self.db.inset(dictmp['key'], value)
+
+        if dictmp:
+            value = json.dumps(dictmp)
+            self.db.inset(dictmp['key'], value)
+            return True
+        else:
+            return False
+
+    def getAllDic(self):
+        self.updateDictData()
+        return self.dubDic
 
     def updateDictData(self):
         self.initTool()
