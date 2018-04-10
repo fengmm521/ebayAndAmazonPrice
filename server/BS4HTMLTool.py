@@ -38,21 +38,23 @@ class BS4HTMLTool(object):
     def initTool(self):
         self.dubDic = self.db.getDBDatas()     #商品详细内容
         self.dcount = len(self.dubDic.keys())  #保存的商品数量
-
+        
     def getUrl(self,purl):
         try:
             if purl[0:5] == 'https':
-                headers = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
-                res = requests.get(purl, verify=False,headers=headers)
+                s = requests.Session()
+                s.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'})
+                res = s.get(purl,verify=False)
                 return res.text
             else:
-                headers = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
-                res = requests.get(purl,headers=headers)
+                s = requests.Session()
+                s.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'})
+                res = s.get(purl)
                 return res.text
         except Exception as e:
             print(e)
         return None
-        
+
     def getImage(self,purl,savename):
         imaexp = purl[purl.rfind('.'):]
         savepth = 'img' + os.sep + savename + imaexp
@@ -81,6 +83,8 @@ class BS4HTMLTool(object):
         # f.close()
         print('-------eBay---------')
         imgurl = self.findEbayImgURL(htmlstr)
+        # print('--------ebayimg----------------')
+        # print(imgurl)
         title = self.findEbayTitle(htmlstr)
         price = self.findEbayPrice(htmlstr)
         base64url = base64.b64encode(purl)
@@ -110,6 +114,16 @@ class BS4HTMLTool(object):
         outstr = ''
         for c in soup.find_all(name='span',id='prcIsum',itemprop='price'):
             outstr = c.text
+        if outstr == '':
+            #notranslate vi-VR-cvipPrice
+            def findtag(tag):
+                if tag.name == 'span' and 'class' in tag.attrs and 'vi-VR-cvipPrice' in tag.attrs['class']:
+                    return True
+                else:
+                    return False
+            for c in soup.find_all(findtag):
+                outstr = c.text
+        outstr = outstr.replace(',','')
         pot = outstr.find('$')
         outstr = outstr[pot:]
         return outstr
@@ -121,6 +135,8 @@ class BS4HTMLTool(object):
         # f.close()
         print('-------Amazon---------')
         imgurl = self.findAmazonImgURL(htmlstr)
+        print('--------amaimg----------------')
+        print(imgurl)
         title = self.findAmazonTitle(htmlstr)
         price = self.findAmazonPrice(htmlstr)
         base64url = base64.b64encode(purl)
@@ -135,11 +151,13 @@ class BS4HTMLTool(object):
         #<div id="imgTagWrapperId" class="imgTagWrapper" style="height: 350px;">
         soup = BeautifulSoup(htmlstr,"html.parser")
         outstr = ''
-        for c in soup.find_all(name='img',id='comparison_image'):
-            outstr = c.attrs['src']
+        for c in soup.find_all(name='img',id='landingImage'):
+            outstr = c.attrs['data-old-hires']
+        if outstr == '':
+            for c in soup.find_all(name='img',id='comparison_image'):
+                outstr = c.attrs['src']
+        
         return outstr
-
-        pass
     def findAmazonTitle(self,htmlstr):
         soup = BeautifulSoup(htmlstr,"html.parser")
         outstr = soup.title.text
@@ -152,7 +170,28 @@ class BS4HTMLTool(object):
         for c in soup.find_all(name='span',id='priceblock_ourprice'):
             outstr = c.text
             break
+        outstr = outstr.replace(',','')
         return outstr
+
+    def getItemIDFromEbayUrl(self,purl):
+        tmps = purl.split('?')
+        ftmp = tmps[0]
+        pot = ftmp.rfind('/') + 1
+        tid = ftmp[pot:]
+        return tid
+
+    def getItemIDFromAmazonUrl(self,purl):
+
+        tid = ''
+        if purl.find('/product/') != -1:
+            spot = purl.find('/product/') + 9
+            epot = spot + 10
+            tid = purl[spot:epot]
+        elif purl.find('/dp/') != -1:
+            spot = purl.find('/dp/') + 4
+            epot = spot + 10
+            tid = purl[spot:epot]
+        return tid
 
     def getRelUrl(self,dat1,dat2):
         print(dat1)
@@ -161,9 +200,9 @@ class BS4HTMLTool(object):
         amazon = ''
         if dat1[:4] == 'http':
             if dat1.find('ebay.com') != -1:
-                ebay = dat1
+                ebay = self.getItemIDFromEbayUrl(dat1)
             elif dat1.find('amazon.com') != -1:
-                amazon = dat1
+                amazon = self.getItemIDFromAmazonUrl(dat1)
             else:
                 errostr = '输入数据错误:%s'%(dat1)
                 print(errostr.decode())
@@ -176,9 +215,9 @@ class BS4HTMLTool(object):
 
         if dat2[:4] == 'http':
             if dat2.find('ebay.com') != -1:
-                ebay = dat2
+                ebay = self.getItemIDFromEbayUrl(dat2)
             elif dat2.find('amazon.com') != -1:
-                amazon = dat2
+                amazon = self.getItemIDFromAmazonUrl(dat2)
             else:
                 errostr = '输入数据错误:%s'%(dat2)
                 print(errostr.decode())
@@ -279,12 +318,20 @@ def main():
 def test():
     tool = BS4HTMLTool()
     dobj = tool.getTowObjData('https://www.ebay.com/itm/173240166353', 'https://www.amazon.com/dp/B079NP3NMH')
-    
-
+    jstr = json.dumps(dobj)
+    print(jstr)
+def test1():
+    tool = BS4HTMLTool()
+    htmlstr = tool.getUrl('https://www.ebay.com/itm/172708429184')
+    f = open('ebayprice.html','w')
+    f.write(htmlstr)
+    f.close()
+    pstr = tool.findEbayPrice(htmlstr)
+    print(pstr)
 #测试
 if __name__ == '__main__':
     # main()
-    test()
+    test1()
 
 
 

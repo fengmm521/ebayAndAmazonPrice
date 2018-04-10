@@ -32,10 +32,30 @@ def test2():
     aaa = time.strftime('%Y-%m-%d\n %H:%M:%S',time.localtime(time.time()))
     print(aaa)
 
+
+def amazon_price(url, user_agent):
+    kv = {'user-agent': user_agent}
+    r = requests.get(url, headers = kv)
+    r.raise_for_status()
+    r.encoding = r.apparent_encoding
+    atxt = r.text.encode("utf-8")
+    # tree = lxml.html.fromstring(r.text.encode("utf-8"))
+    # price = tree.cssselect("span#priceblock_ourprice")[0]
+    # return price.text_content().encode("gbk")
+    f = open('amazon1.html','w')
+    f.write(atxt)
+    f.close()
+
+def pricetest():
+    url = "https://www.amazon.com/dp/B079NP3NMH"
+    user_agent = 'Mozilla/5.0'
+    amazon_price(url, user_agent)
+
+
 #测试
 if __name__ == '__main__':
     # main()
-    test2()
+    pricetest()
 
 
 

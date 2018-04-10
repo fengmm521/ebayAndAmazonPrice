@@ -125,16 +125,29 @@ def createTableTR(dat):
     uptime = '%s<p>%s</p>'%(uptimes[0],uptimes[1])
     print(aprice)
     print(eprice)
-    aprice = float(aprice[1:])
-    eprice = float(eprice[1:])
-    sp = aprice-eprice
-    subprice = '$%.2f'%(sp)
-
+    try:
+        aprice = float(aprice[1:])
+    except Exception as e:
+        aprice = 0.0
+    try:
+        eprice = float(eprice[1:])
+    except Exception as e:
+        eprice = 0.0
+    
     pricecolor = ''
-    if sp < 0:
-        pricecolor = 'color:#19cb1d;'
-    elif sp > 0:
-        pricecolor = 'color:#e92020;'
+
+    if aprice == 0:
+        sp = aprice-eprice
+        subprice = '亚马逊价格错误'
+    elif eprice == 0:
+        subprice = 'ebay价格错误'
+    else:
+        sp = aprice-eprice
+        subprice = '$%.2f'%(sp)
+        if sp < 0:
+            pricecolor = 'color:#19cb1d;'
+        elif sp > 0:
+            pricecolor = 'color:#e92020;'
 
     tmphtml = '''
     <tr>
