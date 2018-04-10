@@ -205,8 +205,13 @@ class myHandler(BaseHTTPRequestHandler):
         print(itemsobj)
         print(type(itemsobj))
         if addTowURL(itemsobj['ebayitem'], itemsobj['amazonitem']):
-            fpth = curdir + os.sep + 'html' + os.sep + 'list.html'
-            self.sendHtml(fpth)
+            # fpth = curdir + os.sep + 'html' + os.sep + 'list.html'
+            # self.sendHtml(fpth)
+            # htmlstr = createListHtml()
+            # self.sendHtmlStr(htmlstr)
+            jobj = {'erro':0,'msg':'添加商品成功'}
+            msg = json.dumps(jobj,ensure_ascii=False)
+            self.sendTxtMsg(msg)
         else:
             self.sendTxtMsg('添加商品失败，请查看输入地址是否正确.')
 
@@ -591,7 +596,9 @@ if __name__ == '__main__':
     delaytime = tool.upTime
     startServer()
     while True:
+        print('update 2hour')
         tool.updatePer2Hour()
+        print('update 2hour end')
         time.sleep(delaytime)
 
 

@@ -82,22 +82,36 @@
                         return true;
                 }
         }
+        var flag=false;
 
         function check()
         {
-                if(verun() == true)
+                if(verun() == true && !flag)
+                {
+                        flag = true;
+                        alert('新增商品成功，请等待页面刷新');
                         return true;
+                }
+                else if(flag)
+                {
+                        alert('新增商品失败，不要重复提交,请等待上次提交页面刷新！');
+                        return false;
+                }
                 else 
                 {
-                        alert('新增商品失败，请填写增加的商品地址或ID！')
+                        alert('新增商品失败，请填写增加的商品地址或ID！');
                         return false;
                 }
         }
+
+        // window.location.reload(true);
+
+
         </script>
 </head>
 <body>
         <div id='login'>
-                <form action='./additem' onsubmit="return check();" method='post'>
+                <form action='./additem' onsubmit="return check();" method='post' target="hidden_frame">
                 <table align="center">                
                         <tr>
                                 <td><span class='must'>*</span>eBay商品：</span></td>
@@ -115,7 +129,24 @@
                         </tr> -->
                 </table>
                 </form>
+                <iframe name='hidden_frame' id="hidden_frame" style='display: none'></iframe>
                 
         </div>
+         <script>
+        var iframe=document.getElementById("hidden_frame");
+            iframe.onload= function () {
+                var bodycontent=iframe.contentDocument.body.innerText;
+                console.log(bodycontent);
+                var json2 = JSON.parse(bodycontent);
+                console.log(json2.erro);
+                if (json2.erro == 0){
+                        // window.location.reload(true);
+                        var purl = 'http://'+window.location.host+'/'+'additem.html'
+                        parent.window.location.href=purl; 
+                }else{
+                        alert(bodycontent)
+                }
+            }
+        </script>
 </body>
 </html>

@@ -155,6 +155,8 @@ class BS4HTMLTool(object):
         return outstr
 
     def getRelUrl(self,dat1,dat2):
+        print(dat1)
+        print(dat2)
         ebay = ''
         amazon = ''
         if dat1[:4] == 'http':
@@ -195,7 +197,6 @@ class BS4HTMLTool(object):
         #173240166353
         #B079NP3NMH
         ebay,amazon = self.getRelUrl(pebay, pamazon)
-
         if ebay == '' or amazon == '':
             return None
 
@@ -261,7 +262,7 @@ class BS4HTMLTool(object):
             atime = self.dubDic[k]['amazon']['time']
             if ptime - etime >= self.upTime or ptime - atime >= self.upTime:  #两小时更新一次
                 eurl = self.dubDic[k]['ebay']['url']
-                aurl = self.dubDic[k]['ebay']['url']
+                aurl = self.dubDic[k]['amazon']['url']
                 dtmp = self.getTowObjData(eurl,aurl)
                 dtmp['time'] = self.dubDic[k]['time']
                 dtmp['key'] = k
