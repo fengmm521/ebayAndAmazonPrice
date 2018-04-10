@@ -10,7 +10,8 @@ import hashlib
 import dbTool
 import json
 import random
-
+import io
+from PIL import Image
 
 from bs4 import BeautifulSoup
 
@@ -55,6 +56,13 @@ class BS4HTMLTool(object):
             print(e)
         return None
 
+    #缩放下载的图片大小,以增加网站图片显示速度
+    def resizeImgAndSave(self,imgcontext,savepth):
+        data_stream = io.BytesIO(imgcontext)
+        pil_img = Image.open(data_stream)
+        img = pil_img.resize((80, 80),Image.ANTIALIAS)
+        img.save(savepth)
+
     def getImage(self,purl,savename):
         imaexp = purl[purl.rfind('.'):]
         savepth = 'img' + os.sep + savename + imaexp
@@ -63,14 +71,16 @@ class BS4HTMLTool(object):
                 s = requests.Session()
                 s.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'})
                 html = s.get(purl,verify=False)
-                with open(savepth, 'wb') as file:
-                    file.write(html.content)
+                self.resizeImgAndSave(html.content, savepth)
+                # with open(savepth, 'wb') as file:
+                #     file.write(html.content)
             else:
                 s = requests.Session()
                 s.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'})
                 html = s.get(purl)
-                with open(savepth, 'wb') as file:
-                    file.write(html.content)
+                self.resizeImgAndSave(html.content, savepth)
+                # with open(savepth, 'wb') as file:
+                #     file.write(html.content)
             return True
         except Exception as e:
             print(e)
@@ -78,9 +88,9 @@ class BS4HTMLTool(object):
         
     def getMsgWithURL_eBay(self,purl):
         htmlstr = self.getUrl(purl)
-        # f = open('ebay.txt','w')
-        # f.write(htmlstr)
-        # f.close()
+        f = open('ebay.txt','w')
+        f.write(htmlstr)
+        f.close()
         print('-------eBay---------')
         imgurl = self.findEbayImgURL(htmlstr)
         # print('--------ebayimg----------------')
@@ -118,6 +128,23 @@ class BS4HTMLTool(object):
             #notranslate vi-VR-cvipPrice
             def findtag(tag):
                 if tag.name == 'span' and 'class' in tag.attrs and 'vi-VR-cvipPrice' in tag.attrs['class']:
+                    return True
+                else:
+                    return False
+            for c in soup.find_all(findtag):
+                outstr = c.text
+        if outstr == '':
+            def findtag(tag):
+                if tag.name == 'span' and 'class' in tag.attrs and 'notranslate' in tag.attrs['class'] and 'id' in tag.attrs and tag.attrs['id'] == 'mm-saleDscPrc':
+                    return True
+                else:
+                    return False
+            for c in soup.find_all(findtag):
+                outstr = c.text
+
+        if outstr == '':
+            def findtag(tag):
+                if tag.name == 'span' and 'class' in tag.attrs and 'notranslate' in tag.attrs['class'] and 'id' in tag.attrs and tag.attrs['id'] == 'prcIsum':
                     return True
                 else:
                     return False
@@ -170,6 +197,12 @@ class BS4HTMLTool(object):
         for c in soup.find_all(name='span',id='priceblock_ourprice'):
             outstr = c.text
             break
+
+        if outstr == '':
+            #priceblock_dealprice
+            for c in soup.find_all(name='span',id='priceblock_dealprice'):
+                outstr = c.text
+                break
         outstr = outstr.replace(',','')
         return outstr
 
@@ -276,6 +309,11 @@ class BS4HTMLTool(object):
             outdat = self.getMsgWithURL_Amazon(aurl)
         return outdat
 
+
+    def removeOneDataWithKey(self,k):
+        self.db.delet(k)
+        self.updateDictData()
+
     def addNewDobuleURL(self,eurl,aurl):
         dictmp = self.getTowObjData(eurl, aurl,isFirst = True)
 
@@ -322,6 +360,7 @@ def test():
     print(jstr)
 def test1():
     tool = BS4HTMLTool()
+    #1345339386
     htmlstr = tool.getUrl('https://www.ebay.com/itm/172708429184')
     f = open('ebayprice.html','w')
     f.write(htmlstr)

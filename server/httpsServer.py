@@ -94,20 +94,21 @@ def addTowURL(ebayurl,amazonurl):
     isOK = bs4Requesttool.addNewDobuleURL(ebayurl, amazonurl)
     return isOK
 
-listhtmppth = curdir + os.sep +'html' + os.sep + 'listframe.html'
 
-def createTableTR(dat):
+
+def createTableTR(dat,isAdditem = False):
     
     amazonurl = dat['amazon']['url']
     aimg = dat['amazon']['imgname']
     anametmp = dat['amazon']['name']
+    anametmp = anametmp[12:97]
     aname = '''<a href="%s" target="view_window">%s</a>'''%(amazonurl,anametmp)
     
     aprice = dat['amazon']['price']
 
     ebayurl = dat['ebay']['url']
     eimg = dat['ebay']['imgname']
-    enametmp = dat['ebay']['name']
+    enametmp = dat['ebay']['name'][:85]
 
     ename = '''<a href="%s" target="view_window">%s</a>'''%(ebayurl,enametmp)
 
@@ -123,8 +124,10 @@ def createTableTR(dat):
     uptime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(uptime))
     uptimes = uptime.split(' ')
     uptime = '%s<p>%s</p>'%(uptimes[0],uptimes[1])
-    print(aprice)
-    print(eprice)
+
+    trid = dat['key']
+    # print(aprice)
+    # print(eprice)
     try:
         aprice = float(aprice[1:])
     except Exception as e:
@@ -135,7 +138,7 @@ def createTableTR(dat):
         eprice = 0.0
     
     pricecolor = ''
-
+    sp = 0
     if aprice == 0:
         sp = aprice-eprice
         subprice = '亚马逊价格错误'
@@ -149,49 +152,100 @@ def createTableTR(dat):
         elif sp > 0:
             pricecolor = 'color:#e92020;'
 
+    tabdel = ''''''
+    if isAdditem:
+        #增加册除行from
+        tabdel = '''
+            <td valign="middle" align="center" width="40" height="40" style='text-align:center;'>
+                <form id="formdel" name="formdel" action="./del" method='get' target="del_frame">
+                    <input type="hidden" name="tid" value="%s" />
+                    <input type="submit" value="删除"/>
+                </form>
+            </td>
+        '''%(trid)
+  #   tmphtml = '''
+  #   <tr>
+  #       <td>
+  #           <div class="boximg">
+  #               <img src="./../img/%s.jpg" width="80" height="80" border="0" style=" vertical-align:middle;"/>
+  #           </div>
+  #       </td>
+  #       <td width="300" height="80" align="center" valign="middle" style="word-break: break-all; word-wrap: break-all; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; display: block; font-size: 14px;">
+  #               %s
+  #       </td>
+  #       <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
+  #           %s
+  #       </td>
+  #       <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
+  #           %s
+  #       </td>
+  #       <td valign="middle" width="300" height="80" style="word-break:break-all;word-wrap:break-all;text-overflow:ellipsis;overflow-y:hidden;overflow-x:hidden;display:block;font-size: 14px;">
+  #           %s
+  #       </td>
+  #       <td>
+  #           <div class="boximg">
+  #               <img src="./../img/%s.jpg" width="80" height="80" border="0" style=" vertical-align:middle;"/>
+  #           </div>
+  #       </td>
+  #       <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
+
+  #       <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
+
+  #       <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px;font-weight:bold;%s">%s</td>
+  # </tr>\n
+  #   '''%(aimg,aname,aprice,eprice,ename,eimg,str(createtime),str(uptime),pricecolor,str(subprice))
     tmphtml = '''
     <tr>
         <td>
             <div class="boximg">
-                <img src="./../img/%s.jpg" width="80" height="80" border="0" style=" vertical-align:middle;"/>
+                <img src="./../img/%s.jpg" width="40" height="40" border="0" style=" vertical-align:middle;"/>
             </div>
         </td>
-        <td width="300" height="80" align="center" valign="middle" style="word-break: break-all; word-wrap: break-all; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; display: block; font-size: 14px;">
+        <td width="300" height="40" align="center" valign="middle" style="word-break: break-all; word-wrap: break-all; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; display: block; font-size: 14px;">
                 %s
         </td>
-        <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
+        <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
             %s
         </td>
-        <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
+        <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px; color:#b81820;font-weight:bold;">
             %s
         </td>
-        <td valign="middle" width="300" height="80" style="word-break:break-all;word-wrap:break-all;text-overflow:ellipsis;overflow-y:hidden;overflow-x:hidden;display:block;font-size: 14px;">
+        <td valign="middle" width="300" height="40" style="word-break:break-all;word-wrap:break-all;text-overflow:ellipsis;overflow-y:hidden;overflow-x:hidden;display:block;font-size: 14px;">
             %s
         </td>
         <td>
             <div class="boximg">
-                <img src="./../img/%s.jpg" width="80" height="80" border="0" style=" vertical-align:middle;"/>
+                <img src="./../img/%s.jpg" width="40" height="40" border="0" style=" vertical-align:middle;"/>
             </div>
         </td>
-        <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
+        <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
 
-        <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
+        <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;">%s</td>
 
-        <td valign="middle" align="center" width="120" height="80" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px;font-weight:bold;%s">%s</td>
-  </tr>\n
-    '''%(aimg,aname,aprice,eprice,ename,eimg,str(createtime),str(uptime),pricecolor,str(subprice))
+        <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 16px;font-weight:bold;%s">%s</td>
 
-    return tmphtml
+        %s
+  </tr>
+    \n
 
+    '''%(aimg,aname,aprice,eprice,ename,eimg,str(createtime),str(uptime),pricecolor,str(subprice),tabdel)
+    return [sp,tmphtml]
+
+listhtmppth = curdir + os.sep +'html' + os.sep + 'listframe.html'
+laddhtmlth = curdir + os.sep +'html' + os.sep + 'laddframe.html'
 #从数据生成一个html网页
-def createListHtml():
+def createListHtml(isAdditem = False):
     global bs4Requesttool
     datdic = bs4Requesttool.getAllDic()
     #duboleobj['key'] = objname
     #duboleobj['ebay'] = {'imgurl':imgurl,'imgname':imgSaveName,'name':title,'price':price,'time':int(time.time()),'market':'ebay','url':purl}
     #duboleobj['amazon'] = {'imgurl':imgurl,'imgname':imgSaveName,'name':title,'price':price,'time':int(time.time()),'market':'amazon','url':purl}
     #duboleobj['time'] = time
-    f = open(listhtmppth,'r')
+    f = None
+    if isAdditem:
+        f = open(laddhtmlth,'r')
+    else:
+        f = open(listhtmppth,'r')
     liststr = f.read()
     f.close()
     fpot = liststr.find('$1')
@@ -203,9 +257,16 @@ def createListHtml():
 
     outhtml = fhtml + '\n'
 
+    outs = []
     for k in datdic.keys():
-        outhtml += createTableTR(datdic[k])
 
+        outtmp = createTableTR(datdic[k],isAdditem)
+        outs.append(outtmp)
+
+    outs.sort(reverse = False)  #按差价从小到大排序
+
+    for d in outs:
+        outhtml += d[1]
     outhtml += ehtml
 
     return outhtml
@@ -227,7 +288,11 @@ class myHandler(BaseHTTPRequestHandler):
             self.sendTxtMsg(msg)
         else:
             self.sendTxtMsg('添加商品失败，请查看输入地址是否正确.')
-
+    def removeItem(self,tid):
+        bs4Requesttool.removeOneDataWithKey(tid)
+        jobj = {'erro':0,'msg':'删除商品成功'}
+        msg = json.dumps(jobj,ensure_ascii=False)
+        self.sendTxtMsg(msg)
     def login(self,logindat):
         print(logindat)
         # self.sendMsg('login')
@@ -265,6 +330,9 @@ class myHandler(BaseHTTPRequestHandler):
                     if self.path[-14:] == 'listframe.html':
                         htmlstr = createListHtml()
                         self.sendHtmlStr(htmlstr)
+                    elif self.path[-14:] == 'laddframe.html':
+                        htmlstr = createListHtml(isAdditem = True)
+                        self.sendHtmlStr(htmlstr)
                     else:
                         fpth = curdir + os.sep + 'html' + os.sep + self.path
                         self.sendHtml(fpth)
@@ -280,7 +348,22 @@ class myHandler(BaseHTTPRequestHandler):
                 return 'login'
             elif self.path[1:8] == 'additem': #增加新商品
                 print('additem---->',self.path)
+
                 return 'additem'
+            elif self.path[1:4] == 'del':
+                if self.checkCookie(cookiestr):
+                    print(self.path)
+                    tidtmp = self.path.split('?')[1]
+                    dats = tidtmp.split('=')
+                    print(dats)
+                    ktmp = dats[0]
+                    tid = dats[1]
+                    self.removeItem(tid)
+                else:
+                    jobj = {'erro':1,'msg':'用户未登陆'}
+                    msg = json.dumps(jobj,ensure_ascii=False)
+                    self.sendTxtMsg(msg)
+                    return
             else:
                 time.sleep(3)
                 self.sendEmptyMsg()

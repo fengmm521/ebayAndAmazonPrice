@@ -36,7 +36,6 @@
                         return true;
                 }
         }
-
         </script>
 </head>
 
@@ -66,6 +65,8 @@
         <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 12px;font-weight:bold;">采集时间</td>
 
         <td valign="middle" align="center" width="120" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 14px;font-weight:bold;">价格差</td>
+
+        <td valign="middle" align="center" width="80" height="40" style="word-break: break-all; word-wrap: 14; text-overflow: ellipsis; overflow-y: hidden; overflow-x: hidden; font-size: 14px;font-weight:bold;">操作</td>
   </tr>
   $1
   <tr>
@@ -100,5 +101,22 @@
     $2
 
 </table>
+    <iframe name='del_frame' id="del_frame" style='display: none'></iframe>
+        <script>
+            var iframe=document.getElementById("del_frame");
+            iframe.onload= function () {
+                var bodycontent=iframe.contentDocument.body.innerText;
+                console.log(bodycontent);
+                var json2 = JSON.parse(bodycontent);
+                console.log(json2.erro);
+                if (json2.erro == 0){
+                        // window.location.reload(true);
+                        var purl = 'http://'+window.location.host+'/'+'additem.html'
+                        parent.window.location.href=purl; 
+                }else{
+                        alert(bodycontent)
+                }
+            }
+        </script>
 </body>
 </html>
