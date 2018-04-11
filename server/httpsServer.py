@@ -309,6 +309,7 @@ class myHandler(BaseHTTPRequestHandler):
             self.sendHtml(fpth)
     def checkCookie(self,cookiestr):
         if cookiestr:
+            updateUser()
             tmpss = cookiestr.split('=')[1]
             if tmpss in usercookies:
                 return True
@@ -417,6 +418,7 @@ class myHandler(BaseHTTPRequestHandler):
             data = self.rfile.read(nbytes)
             msgobj = self.decodePostData(data)
             if reqtype == 'login':  
+                updateUser()
                 self.login(msgobj)
             elif reqtype == 'additem':
                 self.addItems(msgobj)
