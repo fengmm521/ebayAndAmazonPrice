@@ -3,3 +3,5 @@
 *.db
 *.pyc
 server/SpryAssets
+server/ebay.txt
+server/db/data.db

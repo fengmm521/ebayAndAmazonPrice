@@ -310,9 +310,11 @@ class myHandler(BaseHTTPRequestHandler):
     def checkCookie(self,cookiestr):
         if cookiestr:
             updateUser()
-            tmpss = cookiestr.split('=')[1]
-            if tmpss in usercookies:
-                return True
+            cs = cookiestr.split(';')
+            for c in cs:
+                tmpss = c.split('=')[1]
+                if tmpss in usercookies:
+                    return True
         return False
     def do_GET(self):  
     	print('clientIP-->',self.client_address[0])
