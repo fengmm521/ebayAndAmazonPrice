@@ -5,3 +5,4 @@
 server/SpryAssets
 server/ebay.txt
 server/db/data.db
+*.pyc

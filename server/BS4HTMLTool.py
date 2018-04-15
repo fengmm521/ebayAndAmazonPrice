@@ -88,9 +88,9 @@ class BS4HTMLTool(object):
         
     def getMsgWithURL_eBay(self,purl):
         htmlstr = self.getUrl(purl)
-        f = open('ebay.txt','w')
-        f.write(htmlstr)
-        f.close()
+        # f = open('ebay.txt','w')
+        # f.write(htmlstr)
+        # f.close()
         print('-------eBay---------')
         imgurl = self.findEbayImgURL(htmlstr)
         # print('--------ebayimg----------------')
@@ -180,6 +180,14 @@ class BS4HTMLTool(object):
         outstr = ''
         for c in soup.find_all(name='img',id='landingImage'):
             outstr = c.attrs['data-old-hires']
+            try:
+                if (not outstr) or outstr == '':
+                    jstr = c.attrs['data-a-dynamic-image']
+                    dic = json.loads(jstr)
+                    outstr = dic.keys()[0]
+            except Exception as e:
+                outstr = ''
+            
         if outstr == '':
             for c in soup.find_all(name='img',id='comparison_image'):
                 outstr = c.attrs['src']
