@@ -685,20 +685,29 @@ def startServer():
     thr.start()
 
 
+def getUpdateConfigTime():
+    updateUser()
+    try:
+        return configdic['updatetime']
+    except Exception as e:
+        return None
+    
+
 if __name__ == '__main__':
     # server = ThreadedHTTPServer(serverAddr, myHandler)
     # print 'https server is running....'
     # print 'Starting server, use <Ctrl-C> to stop'
     # server.socket = ssl.wrap_socket (server.socket, certfile='server.pem', server_side=True)
     # server.serve_forever()
-    ptime = 60*60*2
+
+    ptime = getUpdateConfigTime()
+    if not ptime:
+        ptime = 60  #如果未设置更新间隔时间，更新时间为每分钟更新一个商品
     tool = BS4HTMLTool.BS4HTMLTool(ptime)
     delaytime = tool.upTime
     startServer()
     while True:
-        print('update 2hour')
-        tool.updatePer2Hour()
-        print('update 2hour end')
+        tool.updateOneItemWithTime()
         time.sleep(delaytime)
 
 

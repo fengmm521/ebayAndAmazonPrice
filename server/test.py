@@ -26,7 +26,9 @@ def main():
     pass
 
 def test():
-    getStoreRQImageFromServer()
+    a = [[1,0],[5,2],[3,1]]
+    a.sort(reverse = True)
+    print(a)
 
 def test2():
     aaa = time.strftime('%Y-%m-%d\n %H:%M:%S',time.localtime(time.time()))
@@ -51,11 +53,10 @@ def pricetest():
     user_agent = 'Mozilla/5.0'
     amazon_price(url, user_agent)
 
-
 #测试
 if __name__ == '__main__':
     # main()
-    pricetest()
+    test()
 
 
 

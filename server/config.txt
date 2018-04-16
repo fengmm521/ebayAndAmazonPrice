@@ -2,7 +2,7 @@
     "ip":"127.0.0.1",
     "port":8901,
     "user":{
-        "user":"pwd",
-        "user2":"pwd2"
-    }
+        "user":"pwd"
+    },
+    "updatetime":60
 }

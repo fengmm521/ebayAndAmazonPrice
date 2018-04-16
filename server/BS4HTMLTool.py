@@ -355,6 +355,28 @@ class BS4HTMLTool(object):
                 self.db.update(k,jstr)
             dt = random.randint(1,5)
             time.sleep(dt)   #延时一个随军机秒数，再更新下一个
+    def updateOneItemWithTime(self):
+        self.updateDictData()
+        ptime = int(time.time())
+        tlist = []
+
+        for k in self.dubDic.keys():
+            etime = self.dubDic[k]['ebay']['time']
+            atime = self.dubDic[k]['amazon']['time']
+            tmp = [etime,k]
+            tlist.append(tmp)
+        tlist.sort() #对商品按更新时间排序，更新时间最早的时间数值小，排在前边
+        tmpk = tlist[0][1]
+        self.updateOneItemWithKey(tmpk)
+    #更新一个商品
+    def updateOneItemWithKey(self,k):
+        eurl = self.dubDic[k]['ebay']['url']
+        aurl = self.dubDic[k]['amazon']['url']
+        dtmp = self.getTowObjData(eurl,aurl)
+        dtmp['time'] = self.dubDic[k]['time']
+        dtmp['key'] = k
+        jstr = json.dumps(dtmp)
+        self.db.update(k,jstr)
 
 def main():
     tool = BS4HTMLTool()
